@@ -1,40 +1,44 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Next.js Custom Domains Example
 
-## Getting Started
+#### Setup the `ENV`
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```env
+# the domain that your app runs on
+NEXT_PUBLIC_APP_PRIMARY_DOMAIN=jsguide.approximated.app
+# the API key that is assigned to this app/cluster
+APPROXIMATED_API_KEY=f58f2f81-00b0-4628-83a7-6aef4b63a59c-0000000000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Pages Router
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+#### Using middleware to handle requests
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+You can use middleware to capture the request before it hits your page for rendering. You can use this to prepare a request before it hits your page, block or stop requests, preform redirects, or use the domain to preform authentication.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+See [middleware.ts](middleware.ts).
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+#### Using API routes to handle requests
 
-## Learn More
+If you have API endpoints in your app that need to use the domain the process is similar to middleware. You can grab the domain off the header and use that in the rest of your code.
 
-To learn more about Next.js, take a look at the following resources:
+See [pages/api/host.ts](pages/api/host.ts).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Using `getServerSideProps` in pages
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Like the API route, you can grab the domain off the headers in the request. You can the use that as `props` in your page when it is rendering.
 
-## Deploy on Vercel
+See [pages/index.tsx](pages/index.tsx).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## App Router
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+#### Using route handlers
+
+If you are using the new `app` directory, you have access to route handlers. Like the other methods, you can pull the domain that is in the request headers.
+
+See [app/app-hosts/route.ts](app/app-hosts/route.ts).
+
+#### Using app pages
+
+If you are using the new `app` directory, you can use server side functions in your pages through server components.
+
+See [app/ssr-page/page.tsx](app/ssr-page/page.tsx).

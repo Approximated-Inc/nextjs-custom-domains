@@ -29,6 +29,12 @@ Like the API route, you can grab the domain off the headers in the request. You 
 
 See [pages/index.tsx](pages/index.tsx).
 
+#### Using client side pages
+
+If you are in a client context and want to get the domain, you can use `window.location.hostname` or `window.location.host` as long as you wrap the logic in a state callback.
+
+See [pages/page-csr.tsx](pages/page-csr.tsx).
+
 ## App Router
 
 #### Using route handlers
@@ -42,3 +48,9 @@ See [app/app-hosts/route.ts](app/app-hosts/route.ts).
 If you are using the new `app` directory, you can use server side functions in your pages through server components.
 
 See [app/ssr-page/page.tsx](app/ssr-page/page.tsx).
+
+#### Using app client side pages
+
+If you are using the new `app` directory and want to get the domain, you can use `window.location.hostname` or `window.location.host` as long as the page uses `"use client"`.
+
+See [app/csr-page/page.tsx](app/csr-page/page.tsx).

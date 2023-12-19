@@ -36,6 +36,20 @@ npm run dev
 
 You should now have a server running on localhost. Usually `http://localhost:3000`.
 
+## Mocking "host" and "apx-incoming-host"
+
+You can use tools like Postman to mock requests from Approximated. By setting the `apx-incoming-host` header or `host` header, you can trigger logic in your app to test conditions and code that requires those headers.
+
+![An example of setting the "apx-incoming-host" header in Postman](postman-1.png)
+
+You can see in this request, we have set the `apx-incoming-host` header so that we can test the code in [app/app-hosts/route.ts](app/app-hosts/route.ts).
+
+![An example of setting the "host" header in Postman](postman-2.png)
+
+Here we are setting just the "host" header in the request, which is captured in the fallback condition in our route code.
+
+You can use this approach for testing the rest of the server-based conditions.
+
 ## Assets and CORS
 
 If your app is linking to assets with absolute paths/URLs, changing it to a relative path should fix any CORS issues.

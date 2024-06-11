@@ -26,7 +26,7 @@ export default function Home({ domain }: InferGetServerSidePropsType<typeof getS
     <main
       className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
     >
-      {domain === process.env.NEXT_PUBLIC_APP_PRIMARY_DOMAIN ? 'Welcome to the primary domain' : `Welcome to the subdomain ${domain}`}
+      {domain === process.env.NEXT_PUBLIC_APP_PRIMARY_DOMAIN ? 'Welcome to the primary domain' : `Welcome to the custom domain ${domain}`}
     </main>
   )
 };

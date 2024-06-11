@@ -1,6 +1,7 @@
 # Next.js Custom Domains Example
 
 This is an example repo to help you understand how you could implement custom domains easily as a feature in your Next.js app using [Approximated](https://approximated.app).
+There is also a companion guide to this repo that [you can find here](https://approximated.app/guides/nextjs-custom-domains-guide/).
 
 ## How it works
 
@@ -64,7 +65,7 @@ If you need to use multiple domains to call your endpoints, you may need to [imp
 
 If you are using the pages router, it is likely [that using the `getServerSideProps` approach](pages/index.tsx) would be the best for you.
 
-The reason for this is that you usually want to run the domain checking code on the server, before you render your pages. This is especially true when you want to use that subdomain to further authenticate the request.
+The reason for this is that you usually want to run the domain checking code on the server, before you render your pages. This is especially true when you want to use that custom domain to further authenticate the request.
 
 Using `getServerSideProps` allows you to create logic that you can then pass down as props to your page components. Keep in mind that `getServerSideProps` can only be used on top level pages and not inside components. If you want to localize the logic to a component, and keep that logic on the server, consider using the app router and "React Server Components".
 
@@ -72,15 +73,15 @@ You can check the sudomain on the client side using `window.location.hostname` o
 
 #### Using the app router (React Server Components)
 
-When using the app router, you can run server side code in your components. This allows you to check the details of the request at the component level. This can be handy when coupled with authentication to conditional render parts of your component based on the details extrapolated from the request subdomain.
+When using the app router, you can run server side code in your components. This allows you to check the details of the request at the component level. This can be handy when coupled with authentication to conditional render parts of your component based on the details extrapolated from the request custom domain.
 
 ### Implications on pre-rendering
 
-It is possible to pre-render pages that conditionally use a subdomain or would otherwise render unique content given that a subdomain is used.
+It is possible to pre-render pages that conditionally use a custom domain or would otherwise render unique content given that a custom domain is used.
 
 To do this, you would need to dramatically reimagine your app architecture. You would need to do the following:
 
-#### Set the `.env` to a specific client subdomain
+#### Set the `.env` to a specific client custom domain
 
 You would need to treat your app as a multi-tenant app where the `.env` sets the tenant.
 
@@ -88,21 +89,21 @@ You can then run `npm run build` whilst that "tenant" is set in the env, and ren
 
 #### Use the "base url" for that tenant
 
-When you are making requests, linking pages, or linking to assets, you need to be sure to use that clients subdomain.
+When you are making requests, linking pages, or linking to assets, you need to be sure to use that clients custom domain.
 
 #### Loop through all your "clients" and render their sites
 
-You would need to change your build step to loop through each client/subdomain in order to render their version of the site. Consider these steps:
+You would need to change your build step to loop through each client/custom domain in order to render their version of the site. Consider these steps:
 
-1. Fetch the list of all the subdomains
-2. For each subdomain, create an `.env` specifically for them
+1. Fetch the list of all the custom domains
+2. For each custom domain, create an `.env` specifically for them
 3. Run `npm run build`
 4. Deploy that static output
 5. Repeat for each client
 
 There are a lot of variables to consider with this setup. So it is difficult to create a demo that could handle all the variants that your app may have.
 
-Another challenge with this approach is that it is not aware of the new subdomains being added to your account. So you would need to make sure that this entire build loop is run when new subdomains are added - making this approach even more complicated.
+Another challenge with this approach is that it is not aware of the new custom domains being added to your account. So you would need to make sure that this entire build loop is run when new custom domains are added - making this approach even more complicated.
 
 Ideally, you can use server-side rendering to conditionally handle the requests to your app. This means using middleware, `getServerSideProps`, or the app router with React Server Components.
 

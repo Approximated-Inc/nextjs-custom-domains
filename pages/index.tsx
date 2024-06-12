@@ -17,8 +17,6 @@ export const getServerSideProps = (async ({ req }) => {
   */
   const domain = req.headers['apx-incoming-host'] || req.headers.host || process.env.NEXT_PUBLIC_APP_PRIMARY_DOMAIN;
 
-  // do something with the "domain"
-
   return { props: { domain } }
 }) as GetServerSideProps<ApproximatedPage>;
 
@@ -37,6 +35,7 @@ interface DomainFormData {
   incoming_address: string;
 }
 
+// A simple form for submitting a custom domain to be connected to this app
 const DomainForm: React.FC = () => {
   const [incoming_address, setDomain] = useState<string>('');
   const [errors, setErrors] = useState<object| null>(null); // State to hold response errors
@@ -60,8 +59,6 @@ const DomainForm: React.FC = () => {
 
     const data = await response.json();
     if (!response.ok) {
-      console.log(data);
-      // Assuming the error message is in the `message` field
       if(data.error === 'Unauthorized'){
         setErrors({'unauthorized': 'Unauthorized - incorrect or missing Approximated API key.', 'help': 'Check your env variables for APPROXIMATED_API_KEY.'});
       }else{
@@ -70,7 +67,8 @@ const DomainForm: React.FC = () => {
       return;
     }
 
-    setSuccess(data.data.incoming_address)  // Handle the response as needed
+    // Handle a successful response and display the DNS instructions + link
+    setSuccess(data.data.incoming_address)
     setDnsMessage(data.data.user_message)  
   };
 

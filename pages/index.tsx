@@ -39,9 +39,9 @@ interface DomainFormData {
 
 const DomainForm: React.FC = () => {
   const [incoming_address, setDomain] = useState<string>('');
-  const [errors, setErrors] = useState<any| null>(null); // State to hold response errors
+  const [errors, setErrors] = useState<object| null>(null); // State to hold response errors
   const [success, setSuccess] = useState<string | null>(null); // State to hold success message
-  const [dnsMessage, setDnsMessage] = useState<{string} | null>(null); // State to hold DNS message
+  const [dnsMessage, setDnsMessage] = useState<string | null>(null); // State to hold DNS message
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -89,7 +89,10 @@ const DomainForm: React.FC = () => {
       />
       <button className="ml-2 border border-white rounded-md px-2 py-1 text-xs" type="submit">Submit</button>
         {dnsMessage && <div className="mt-4 mx-auto max-w-xl text-sm mb-2">{dnsMessage}</div>}
-        {success && <div className="mt-2 mx-auto max-w-4xl">Once the DNS for the custom domain is set, <a href={'https://'+success} className="text-green-600 underline">Click here to view it.</a></div>}
+        {success && 
+          <div className="mt-2 mx-auto max-w-4xl">Once the DNS for the custom domain is set, <a href={'https://'+success} target="_blank" className="text-green-600 underline">Click here to view it.</a>
+          </div>
+        }
         {errors && Object.entries(errors).map(([key, message]) => (
           <p key={key} className="text-red-500 mt-2">{message}</p>
         ))}

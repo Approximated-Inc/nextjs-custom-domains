@@ -53,11 +53,11 @@ You should now have a server running on localhost. Usually `http://localhost:300
 
 You can use tools like Postman to mock requests from a custom domain by setting the `host` header to the custom domain.
 
+The downside to this method is that it doesn't enable you to test in the browser easily.
+
 In our server side examples here, we have logic that checks the `host` header and displays content conditionally based on that.
 
-We also have it first check for the `apx-incoming-host` header in our examples because we're using Approximated for SSL/reverse proxy, and it always injects the custom domain into that header.
-
-The downside to this method is that it doesn't enable you to test in the browser easily.
+In this example repo, we also have it first check for the `apx-incoming-host` header because we're using Approximated as the reverse proxy, and it always injects the custom domain into that header.
 
 ![An example of setting the "host" header in Postman](postman-2.png)
 

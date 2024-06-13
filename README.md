@@ -1,15 +1,18 @@
 # Next.js Custom Domains Example
 
-This is an example repo to help you understand how you could implement custom domains easily as a feature in your Next.js app using [Approximated](https://approximated.app).
+This is an example repo to help you understand how you could implement custom domains easily as a feature in your Next.js app.
+
+It uses [Approximated](https://approximated.app) to automate the SSL certs and reverse proxying, but that is **not** a requirement. The approaches here are easily adaptable to other providers or implementations.
+
 There is also a companion guide to this repo that [you can find here](https://approximated.app/guides/nextjs-custom-domains-guide/).
 
 ## How it works
 
-The example app is just a basic fresh Next.js app, with both pages directory and app directory in use.
+The example app is just a basic fresh Next.js app, with examples for both the pages router and app router.
 
-The example purpose of this app is to conditionally display content depending on if the request occurs on a custom domain.
+This is a toy app who's purpose is to conditionally display content depending on if the request occurs on a custom domain.
 
-There is also an example of how to create and manage virtual hosts using the Approximated API.
+There is also an example of how to create and manage virtual hosts using the Approximated API, should you want to use it.
 
 ## Trying it out
 
@@ -23,9 +26,9 @@ Inside the `.env` you can control the details about your setup:
 
 ```env
 # the domain that your app runs on
-NEXT_PUBLIC_APP_PRIMARY_DOMAIN=jsguide.approximated.app
-# the API key that is assigned to this app/cluster
-APPROXIMATED_API_KEY=f58f2f81-00b0-4628-83a7-6aef4b63a59c-0000000000
+NEXT_PUBLIC_APP_PRIMARY_DOMAIN=yourprimarydomain.com
+# your Approximated API key, if you want to use it
+APPROXIMATED_API_KEY=your_approximated_api_key
 ```
 
 This assumes that you have NPM installed:
@@ -37,25 +40,46 @@ npm run dev
 
 You should now have a server running on localhost. Usually `http://localhost:3000`.
 
-## Mocking "host" and "apx-incoming-host"
+## Mocking a custom domain locally
 
-You can use tools like Postman to mock requests from Approximated. By setting the `apx-incoming-host` header or `host` header, you can trigger logic in your app to test conditions and code that requires those headers.
+**Option 1:**
+
+You can use tools like Postman to mock requests from a custom domain by setting the `host` header to the custom domain.
+
+In our server side examples here, we have logic that checks the `host` header and displays content conditionally based on that.
+
+We also have it first check for the `apx-incoming-host` header in our examples because we're using Approximated for SSL/reverse proxy, and it always injects the custom domain into that header.
+
+The downside to this method is that it doesn't enable you to test in the browser easily.
+
+![An example of setting the "host" header in Postman](postman-2.png)
 
 ![An example of setting the "apx-incoming-host" header in Postman](postman-1.png)
 
 You can see in this request, we have set the `apx-incoming-host` header so that we can test the code in [app/app-hosts/route.ts](app/app-hosts/route.ts).
 
-![An example of setting the "host" header in Postman](postman-2.png)
+> [!TIP]
+> Why would we want to use a different header like `apx-incoming-host` instead of just `host` or `x-forwarded-host`?
+>
+> Because many existing apps may have a fair bit of logic (or other pieces in the stack) that expect/allow only one host, and may require quite a bit of modification to allow custom domains otherwise.
+> 
+> We can often completely avoid this issue by having a reverse proxy (like Approximated) set the host header to the primary (expected) domain for custom domain requests, and instead put the custom domain in a separate header for the pieces that need to know about it.
 
-Here we are setting just the "host" header in the request, which is captured in the fallback condition in our route code.
 
-You can use this approach for testing the rest of the server-based conditions.
+**Option 2:**
+
+You may also use other methods to mock a custom domain, like editing your hosts file or using tools that manage local domains or DNS masking. 
+
+These are typically a bit more work and may require some knowledge of how your local system handles domains/DNS, but they will allow you to test in the browser.
+
 
 ## Assets and CORS
 
-If your app is linking to assets with absolute paths/URLs, changing it to a relative path should fix any CORS issues.
+If your app is linking to assets with absolute paths/URLs, changing it to a relative path should fix any CORS issues from a custom domain *if* you're using a reverse proxy in front and always setting the host to the primary domain (as mentioned in the tip above).
 
-If you need to use multiple domains to call your endpoints, you may need to [implement CORS in your routes](https://github.com/vercel/next.js/tree/canary/examples/api-routes-cors).
+For example, change `https://yourapp.com/assets/something.js` to `/assets/something.js`. That way, they'll be loaded over whatever the domain is in the address bar, avoiding CORS issues if you're using the reverse proxy approach.
+
+Otherwise, you may need to [implement CORS in your routes](https://github.com/vercel/next.js/tree/canary/examples/api-routes-cors) in a way that will support dynamic domains or allows any domain (less secure).
 
 ## Digging Deeper
 
@@ -73,39 +97,70 @@ You can check the sudomain on the client side using `window.location.hostname` o
 
 #### Using the app router (React Server Components)
 
-When using the app router, you can run server side code in your components. This allows you to check the details of the request at the component level. This can be handy when coupled with authentication to conditional render parts of your component based on the details extrapolated from the request custom domain.
+When using the app router, you can run server side code in your components. This allows you to check the details of the request at the component level. 
 
-### Implications on pre-rendering
+This can be handy when coupled with authentication to conditional render parts of your component based on the details extrapolated from the request custom domain.
+
+### Implications of pre-rendering
 
 It is possible to pre-render pages that conditionally use a custom domain or would otherwise render unique content given that a custom domain is used.
 
-To do this, you would need to dramatically reimagine your app architecture. You would need to do the following:
+There are a few ways to go about this, depending on the pre-rendering approach and other tools in your stack:
 
-#### Set the `.env` to a specific client custom domain
+#### Static Generation (SSG) - with the custom domain as the host header
 
-You would need to treat your app as a multi-tenant app where the `.env` sets the tenant.
+Since static generation happens at build time, your app will need to know about any custom domains at that time as well if you're not using a reverse proxy in front to modify the host header to the primary domain.
 
-You can then run `npm run build` whilst that "tenant" is set in the env, and render the specific content for them.
+For example, if your app is a blog hosting platform, you could pre-render content with the links, assets, etc. set to the correct custom domain.
 
-#### Use the "base url" for that tenant
+If custom domains can be added after the fact, you'd need to re-render the content at that time as well.
 
-When you are making requests, linking pages, or linking to assets, you need to be sure to use that clients custom domain.
+Now, you can use Incremental Static Regeneration for this, but due to the complexity of that (and lack of support amongst many non-Vercel providers) we're going to skip it here. Perhaps in the future a section on that can be expanded.
 
-#### Loop through all your "clients" and render their sites
+Here's how you could do it with plain SSG:
 
-You would need to change your build step to loop through each client/custom domain in order to render their version of the site. Consider these steps:
+1. Set the `.env` to a specific client custom domain
+  - You would need to treat your app as a multi-tenant app where the `.env` sets the tenant.
+  - You can then run `npm run build` whilst that "tenant" is set in the env, and render the specific content for them.
+2. Use the "base url" for that tenant
+  - When you are making requests, linking pages, or linking to assets, you need to be sure to use that clients custom domain.
+3. Loop through all your "clients" and render their sites
+  - You would need to change your build step to loop through each client/custom domain in order to render their version of the site. 
 
-1. Fetch the list of all the custom domains
-2. For each custom domain, create an `.env` specifically for them
-3. Run `npm run build`
-4. Deploy that static output
-5. Repeat for each client
+Consider these steps:
+  1. Fetch the list of all the custom domains
+  2. For each custom domain, create an `.env` specifically for them
+  3. Run `npm run build`
+  4. Deploy that static output
+  5. Repeat for each client
 
 There are a lot of variables to consider with this setup. So it is difficult to create a demo that could handle all the variants that your app may have.
 
 Another challenge with this approach is that it is not aware of the new custom domains being added to your account. So you would need to make sure that this entire build loop is run when new custom domains are added - making this approach even more complicated.
 
+---
+
+#### Static Generation (SSG) - with the *primary domain* as the host header (requires reverse proxy in front)
+
+This method doesn't require your app to know about custom domains at build time for pre-rendering.
+
+Instead, a reverse proxy overwrites the host header in-flight before it reaches your app, setting it to the primary domain instead of the custom domain.
+
+Depending on your routing logic, you may also want to have it inject the custom domain in a separate header so that it can use that to route to the correct SSG content.
+
+If your app already routes to SSG content based on path, you'll need to have the reverse proxy rewrite requests to include that path as well. There are some pitfalls here to look out for here, [see here for more details](https://approximated.app/docs/#statically-generated-content).
+
+Approximated can do this for you out of the box, and handle the pitfalls, but you can also use any reverse proxy you'd like.
+
+---
+
+#### Server Side Rendering (SSR)
+
 Ideally, you can use server-side rendering to conditionally handle the requests to your app. This means using middleware, `getServerSideProps`, or the app router with React Server Components.
+
+In this context, SSR is not 'pre-rendering' in the same way that SSG is because it's happening at request time. This lets us dynamically handle custom domains, and avoids most or all of the tricky parts involved with SSG.
+
+Whether you're using the custom domain in the host header, or overriding it with the primary domain, typically matters a lot less with SSR as well.
 
 ---
 
@@ -135,6 +190,9 @@ If you are in a client context and want to get the domain, you can use `window.l
 
 See [pages/page-csr.tsx](pages/page-csr.tsx).
 
+> [!WARNING]
+> There are some situations where relying on client-side determination of custom domains may be less secure or more brittle. Ideally we want to handle this server-side where possible.
+
 ### App Router
 
 #### Using route handlers
@@ -154,3 +212,6 @@ See [app/ssr-page/page.tsx](app/ssr-page/page.tsx).
 If you are using the new `app` directory and want to get the domain, you can use `window.location.hostname` or `window.location.host` as long as the page uses `"use client"`.
 
 See [app/csr-page/page.tsx](app/csr-page/page.tsx).
+
+> [!WARNING]
+> There are some situations where relying on client-side determination of custom domains may be less secure or more brittle. Ideally we want to handle this server-side where possible.

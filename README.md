@@ -2,9 +2,16 @@
 
 This is an example repo to help you understand how you could implement custom domains easily as a feature in your Next.js app.
 
-It uses [Approximated](https://approximated.app) to automate the SSL certs and reverse proxying, but that is **not** a requirement. The approaches here are easily adaptable to other providers or implementations.
-
 There is also a companion guide to this repo that [you can find here](https://approximated.app/guides/nextjs-custom-domains-guide/).
+
+> [!NOTE]
+> This repo uses [Approximated](https://approximated.app) to automate the SSL certs and reverse proxying, but that is **not** a requirement.
+>
+> The approaches here are easily adaptable to other providers or implementations.
+
+Vercel also has their [Platforms Starter Kit](https://github.com/vercel/platforms) that you can use as a guide. 
+
+This repo was created as an alternative approach, and aims to provide a simpler introduction with implementations that will work regardless of where you host.
 
 ## How it works
 
